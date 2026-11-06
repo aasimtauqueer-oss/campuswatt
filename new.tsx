@@ -85,8 +85,8 @@ const IndexedDBService = {
         return;
       }
       const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
+      request.onupgradeneeded = () => {
+        const db = request.result;
         if (!db.objectStoreNames.contains(STORES.STATE)) {
           db.createObjectStore(STORES.STATE, { keyPath: 'id' });
         }
@@ -166,7 +166,36 @@ const INITIAL_SETTINGS = {
   requireHumanApproval: true
 };
 
-const INITIAL_ROOMS = [
+type CampusRoom = {
+  id: string;
+  name: string;
+  type: string;
+  building: string;
+  capacity: number;
+  sensorA_occupancy: number | null;
+  sensorB_occupancy: number | null;
+  occupancy: number | 'UNCERTAIN';
+  occupancyStatus: string;
+  timetable: string;
+  isScheduled: boolean;
+  currentKw: number | null;
+  baselineKw: number;
+  expectedActiveKw: number;
+  tempC: number;
+  humidityPct: number;
+  readingAgeMins: number;
+  readingTimestamp: string;
+  rawReliability: string;
+  faultInjected: string;
+  repeatedCount: number;
+  fluctuationIndex: number;
+  essentialEquipment: string | null;
+  isEssentialProtected: boolean;
+  notes: string;
+  history: { time: string; kw: number; baseline: number; occ: number }[];
+};
+
+const INITIAL_ROOMS: CampusRoom[] = [
   {
     id: 'LH-201',
     name: 'Lecture Hall 201',
@@ -2248,7 +2277,7 @@ export default function App() {
                               {room.isEssentialProtected && (
                                 <Lock
                                   className="w-3.5 h-3.5 text-blue-600"
-                                  title={`Protected: ${room.essentialEquipment}`}
+                                  aria-label={`Protected: ${room.essentialEquipment}`}
                                 />
                               )}
                             </div>
